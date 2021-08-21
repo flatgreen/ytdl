@@ -1,0 +1,24 @@
+{
+    "name": "flatgreen/ytdl",
+    "description": "A PHP wrapper for youtube-dl tool. Close to youtube-dl, with a caching system.",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Flatgreen\\Ytdl\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Flatgreen\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "symfony/process": "^5.3",
+        "psr/log": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9",
+        "phpstan/phpstan": "^0.12.88",
+        "brianhenryie/color-logger": "^1.0"
+    }
+}
