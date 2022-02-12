@@ -64,11 +64,11 @@ class Ytdl {
      * Content for a single entry:
      * - id (youtube-dl id) (require for real download)
      * - title (require)
-     * - webpage_url (optional, but good if a prob occure) = link
-     * - url (require for real download)
+     * - webpage_url (optional, but good if a prob occure) = page link/url
+     * - url (require for real media download)
      * - ext (media extension)
      * - format (require for real download)
-     * - _filename is the downloaded media filename
+     * - _filename is the downloaded media filename (not in info_dict extracted)
      * 
      * - and much more ... (but not require for dl)
      * 
@@ -126,6 +126,7 @@ class Ytdl {
         $ytdl_finder = new ExecutableFinder;
         // $this->ytdl_exec = '/usr/bin/youtube-dl'; 
         // or $this->ytdl_exec = '/usr/local/bin/youtube-dl'
+        // TODO see for ytdl-dlp
         $this->ytdl_exec = $ytdl_finder->find('youtube-dl');
         if ($this->ytdl_exec === null){
             $msg = 'No youtube-dl executable - see: https://github.com/ytdl-org/youtube-dl#installation';
@@ -134,6 +135,17 @@ class Ytdl {
         }
         $this->logger->debug('youtube-dl executable: ' . $this->ytdl_exec);
         $this->cache_options = ['directory' => 'cache', 'duration' => 86400];
+        $this->errors = [];
+    }
+    
+    /**
+     * setOptions, can pass the options (once or new ones)
+     *
+     * @param  Options $options
+     * @return void
+     */
+    public function setOptions(Options $options){
+        $this->options = $options;
     }
 
     
@@ -150,6 +162,18 @@ class Ytdl {
         if (!empty($directory_duration)){
             $this->cache_options = array_merge($this->cache_options, $directory_duration);
         }
+    }
+
+    
+    /**
+     * disableCache
+     * 
+     * Would you really that ?
+     *
+     * @return void
+     */
+    public function disableCache(){
+        $this->cache_options = ['directory' => false, 'duration' => 0];
     }
 
 
@@ -171,10 +195,10 @@ class Ytdl {
      * @param  string[] $arguments for youtube-dl (real) process
      * @return Process $process
      */
-    private function createProcess(array $arguments){
-        set_time_limit(0);
+    private function createProcess(array $arguments, int $time_out = 0){
+        set_time_limit($time_out);
         $process = new Process(array_merge([$this->ytdl_exec], $arguments));
-        $process->setTimeout(3600);
+        $process->setTimeout($time_out);
         return $process;
     }
 
@@ -217,6 +241,7 @@ class Ytdl {
     
     /**
      * outError
+     * Collect errors messages for the class
      *
      * @param  string $message
      * @return void
@@ -235,8 +260,10 @@ class Ytdl {
      * 
      * If there is a playlist, all the playlist infos are extracted (and cached).
      * 
+     * If errors then return $info_dict=[], get them with getErrors(), 
+     * 
      * @param string $link like webpage_url in ytdl info_dict
-     * @return mixed[] $info_dict, if errors then $info_dict = []
+     * @return mixed[] $info_dict
      */
     public function extractInfos(string $link){
         $this->info_dict = [];
@@ -282,7 +309,9 @@ class Ytdl {
             $this->info_dict = $this->sanitize($this->info_dict);
 
             // TODO Exception/Error ? to handle 'Fatal error: Allowed memory size of'
-            // in case of huge playlist ==> p-ê with a real message ? and ... json_encode error ?
+            // in case of huge playlist ==> p-ê raise exception ou errors
+            //json_encode can return false => error ?
+            // TODO write cach raise RuntimeException
             if ($cache->write(json_encode($this->info_dict))){
                 $this->logger->debug('write for name `'. $cache->name . '` to cache for url: ' . $link);
             };
@@ -302,9 +331,9 @@ class Ytdl {
      * Detect and rename duplicate for 'title'.
      *
      * @param  mixed[] $info_dict
-     * @return mixed[]|null $info_dict|null if $info_dict is_null or all entries are null...
+     * @return mixed[] $info_dict
      */
-    private function sanitize(array $info_dict = null){
+    private function sanitize(array $info_dict){
         if ($this->isPlaylist($info_dict)){
             foreach($info_dict['entries'] as $k => $entry){
                 if (empty($entry) or empty($entry['title'])){
@@ -383,11 +412,14 @@ class Ytdl {
      * From an $info_dict download the video, else run youtube-dl with extractInfos.
      * 
      * '-o' or '--output' has priority over $data_folder
+     * 
+     * If some media are downloaded return a new info_dict (with _filename.ext for each entrie),
+     * else return [] and it's a good idea to read errors (getErrors()).
      *
      * @param  string $link (same as 'webpage_url')
      * @param  mixed[]|null $info_dict
      * @param  string|'' $data_folder directory path to download (final '/' or not). Not use if '-o' option.
-     * @return mixed[]|false $info_dict original if no download, or new one (with _filename.ext for each entrie) or false if empty $info_dict
+     * @return mixed[] $info_dict (empty or not)
      */
     public function download(string $link, array $info_dict = null, string $data_folder = ''){
         $arguments = $this->options->getOptions();
@@ -401,7 +433,7 @@ class Ytdl {
             $this->extractInfos($link);
         } // now we have : $this->info_dict;
         if (empty($this->info_dict)){
-            return false;
+            return [];
         }
         
         // Playlist or not ?
@@ -425,7 +457,7 @@ class Ytdl {
         return $this->info_dict;
     }
 
-    
+    // FIXME int vs string !!
     /**
      * playlistIndexes
      * 
@@ -439,11 +471,11 @@ class Ytdl {
     public function playlistIndexes(){
         $playlist_items = [];
         $num_entries = count($this->info_dict['entries']);
-        $playlist_start = (int)$this->options->getOption('--playlist-start', 1);
-        $playlist_end = (int)$this->options->getOption('--playlist-end', $num_entries);
+        $playlist_start = (int)$this->options->getOption('--playlist-start', '1');
+        $playlist_end = (int)$this->options->getOption('--playlist-end', (string)$num_entries);
         $playlist_items_str = $this->options->getOption('--playlist-items');
         
-        if ($playlist_items_str !== null){
+        if ($playlist_items_str !== ''){
             $indexes = explode(',', $playlist_items_str);
             foreach($indexes as $v){
                 if (strpos($v, '-') !== false){

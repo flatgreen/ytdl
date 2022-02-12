@@ -12,7 +12,7 @@ use LogicException;
  * All options are the same as youtube-dl and are passed with an array.
  * @link https://github.com/ytdl-org/youtube-dl#options
  * 
- * The class is not for 'url'. You can, but without any ytdl return (or cache).
+ * The class is not for 'URL' argument.
  * 
  * See the 'private $options for default options.
  * 
@@ -39,18 +39,19 @@ class Options{
     /**
      * hold options
      *
-     * @var string[]
+     * @var mixed[]
      */
     private $options;
     
     /**
      * The default options for this class.
      *
-     * @var string[]
+     * @var mixed[]
      */
-    private $default_options = ['--ignore-errors', '--no-progress',
-                        '--no-warnings', '--ignore-config', '--force-ipv4',
-                       ];
+    private $default_options =
+        ['--ignore-errors', '--no-progress',
+        '--no-warnings', '--ignore-config', '--force-ipv4',
+        ];
     
     /**
      * __construct
@@ -65,7 +66,7 @@ class Options{
     /**
      * getDefaultOptions
      *
-     * @return string[]
+     * @return mixed[]
      */
     public function getDefaultOptions(){
         return $this->default_options;
@@ -79,14 +80,14 @@ class Options{
      * ['-f' => '18'] OK
      * ['-f', '18'] Not OK
      *
-     * @param  string[] $options
+     * @param  mixed[] $options
      * @throws LogicException
      * @return void
      */
     private function verifOptions(array $options){
         foreach($options as $k => $v){
             if (is_int($k) && (substr($v, 0, 1) != '-')){
-                throw new \LogicException("Option must begin with '-' or '--'. 'key => value' for option with value");
+                throw new \LogicException("Options must begin with '-' or '--'. 'key' => 'value' for option with value. URL isn't an ytdl option.");
             }
         }
     }
@@ -97,10 +98,10 @@ class Options{
      * 
      * Add or owerwrite some options to ytdl commandline
      *
-     * @param string[] $options
+     * @param mixed[] $options
      * @return $this
      */
-    public function addOptions(array $options = null){
+    public function addOptions(array $options){
         $this->verifOptions($options);
         $this->options = array_merge($this->options, $options);
         return $this;
@@ -111,10 +112,10 @@ class Options{
      * 
      * Reset all default options and set ytdl options
      *
-     * @param  string[] $options
+     * @param  mixed[] $options
      * @return $this
      */
-    public function setOptions(array $options = null){ 
+    public function setOptions(array $options = []){ 
         $this->verifOptions($options);
         $this->options = [];
         if (!empty($options)){
@@ -129,6 +130,8 @@ class Options{
      * 
      * True if begin with '-' or '--' else false
      *
+     * TODO delete ?
+     * 
      * @param  string $needle
      * @return bool
      */
@@ -149,8 +152,8 @@ class Options{
      * 
      * From ['-a', '-b' => 'bb'] to ['-a', '-b', 'bb']
      *
-     * @param  string[] $arr
-     * @return string[]
+     * @param  mixed[] $arr
+     * @return mixed[]
      */
     private function linearOptions(array $arr){
         $final_options = [];
@@ -168,14 +171,14 @@ class Options{
     /**
      * getOption
      * 
-     * return value from options[$key] or just one option (if alone).
-     * Else return default.
-     *
+     * return value from options[$key] or just one option (if alone),
+     * else return default.
+     * 
      * @param string $key
-     * @param string|int|null $default
-     * @return string|null
+     * @param string $default
+     * @return mixed
      */
-    public function getOption(string $key, $default = null){
+    public function getOption(string $key, string $default = ''){
         if ($this->isOption($key)){
             return (key_exists($key, $this->options)) ? $this->options[$key] : $key;
         } else {
@@ -188,7 +191,7 @@ class Options{
      * 
      * return all options ready for ytdl process
      * 
-     * @return string[]
+     * @return mixed[]
      */
     public function getOptions(): array
     {

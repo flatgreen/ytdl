@@ -70,8 +70,9 @@ class Utils
      * @return string the slugify string !
      */
     public static function slugify(string $string, string $delimiter = '-'){
-        $slug = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower();', $string);
-        $slug = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $slug);
+        // $slug = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower();', $string);
+        $slug = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $string);
+        // $slug = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $slug);
         // remove non ascii
         $slug = preg_replace("/[^a-zA-Z0-9\/_|+ -\.]/", ' ', $slug);
         // symbols in -
