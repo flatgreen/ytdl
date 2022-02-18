@@ -1,0 +1,10 @@
+DOC-TODO-LISTE.txt
+test.php
+cache/
+"tests/cache/"
+vendor/
+.vscode
+"examples/cache/"
+"examples/data/"
+.vscode/
+

@@ -19,34 +19,16 @@ use Flatgreen\Ytdl\Utils;
 
 
 /**
- * ytdl class, a wrapper for youtube-dl
+ * ytdl class, a wrapper for youtube-dl.
+ * 
+ * Two goals:
+ * - be close to the command line of youtube-dl (see: Options)
+ * - minimize requests, while having the maximum amount of information (with a cache)
+ * 
  * the usefull informations is in (array) $info_dict
- * (the same than youtube-dl)
+ * (the same structure than youtube-dl)
  * 
  * require: youtube-dl (python) https://github.com/rg3/youtube-dl
- * 
- * example :
- * 
- * 
- * $url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
- * $format = '18/http-480/mp3-v0/best';
- * $data_folder = 'tmp/';
- * $yt = new Ytdl();
- * $yt->setFormat($format);
- * var_dump($this->extractInfos($url);
- * or
- * var_dump($yt->download($url, $data_folder));
- * or with an existing info_dict
- * var_dump($yt->download($url, $data_folder, $an_info_dict))
- * 
- * all informations (array $info_dict):
- * $yt->infos_dict;
- * check errors
- * var_dump($yt->errors);
- * 
- * There is a cache for info_dict (.json).
- * See '__construct' and ->setCache(...)
- * 
  */
 
 
