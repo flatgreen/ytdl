@@ -11,6 +11,7 @@ namespace Flatgreen\Ytdl;
 
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Flatgreen\Ytdl\Options;
@@ -76,10 +77,10 @@ class Ytdl {
     /**
      * cache_options.
      * 
-     * - 'directory' cache directory or false to disable the cache system,
+     * - 'directory' cache directory,
      * - 'duration' in seconde
      * 
-     * Default in __construct : ['directory' => 'cache', 'duration' => 86400]
+     * Default in __construct : ['directory' => null, 'duration' => 3600]
      * 
      * @var mixed[]
      */
@@ -116,10 +117,11 @@ class Ytdl {
             throw new \Exception($msg);
         }
         $this->logger->debug('youtube-dl executable: ' . $this->ytdl_exec);
-        $this->cache_options = ['directory' => 'cache', 'duration' => 86400];
+        $this->cache_options = ['directory' => null, 'duration' => 3600];
         $this->errors = [];
     }
-    
+
+
     /**
      * setOptions, can pass the options (once or new ones)
      *
@@ -134,28 +136,15 @@ class Ytdl {
     /**
      * setCache
      * 
-     * Override the default cache, duration in second
+     * Override the default cache setting
      *
-     * @see cache_options
-     * @param  mixed[] $directory_duration
+     * @param  mixed[] ['directory' => default null or 'path/to/cache', 'duration' => int default 3600 sec]
      * @return void
      */
     public function setCache(array $directory_duration = []){
         if (!empty($directory_duration)){
             $this->cache_options = array_merge($this->cache_options, $directory_duration);
         }
-    }
-
-    
-    /**
-     * disableCache
-     * 
-     * Would you really that ?
-     *
-     * @return void
-     */
-    public function disableCache(){
-        $this->cache_options = ['directory' => false, 'duration' => 0];
     }
 
 
@@ -254,7 +243,7 @@ class Ytdl {
         $playlist_cmd_save = [];
         foreach(['--playlist-start', '--playlist-end', '--playlist-items'] as $pl_cmd){
             $pl_opt = $this->options->getOption($pl_cmd);
-            if ($pl_opt !== null){
+            if (!empty($pl_opt)){
                 $playlist_cmd_save[$pl_cmd] = $pl_opt;
                 $this->options->removeOption($pl_cmd);
             }
@@ -264,13 +253,14 @@ class Ytdl {
         $arguments[] = '--dump-single-json'; // no dl & quiet ('--print-json'; // dl & quiet)
         $arguments[] = $link;
 
-        $cache = new FileCache($link, $this->cache_options['directory'], $this->cache_options['duration']);
-        $json = $cache->load();
+        // cache system
+        $cache = new FilesystemAdapter('ytdl', $this->cache_options['duration'], $this->cache_options['directory']);
 
         // with cache
-        if (!empty($json)){
-            $this->logger->debug('load from cache url: ' . $link . ' ; from cache file: ' . $cache->name);
-            return $this->info_dict = json_decode($json, true);
+        $info_dict_cached = $cache->getItem(md5($link));
+        if ($info_dict_cached->isHit()){
+            $this->logger->debug('load from cache: ' . $link);
+            return $this->info_dict = $info_dict_cached->get();
         }
 
         // without cache
@@ -289,14 +279,11 @@ class Ytdl {
         if (!empty($normalOutput) && ($normalOutput != 'null')){
             $this->info_dict = json_decode($normalOutput, true);
             $this->info_dict = $this->sanitize($this->info_dict);
-
-            // TODO Exception/Error ? to handle 'Fatal error: Allowed memory size of'
-            // in case of huge playlist ==> p-ê raise exception ou errors
-            //json_encode can return false => error ?
-            // TODO write cach raise RuntimeException
-            if ($cache->write(json_encode($this->info_dict))){
-                $this->logger->debug('write for name `'. $cache->name . '` to cache for url: ' . $link);
-            };
+            // TODO Exception/Error ? 'Fatal error: Allowed memory size of'
+            // save to cache
+            $info_dict_cached->set($this->info_dict);
+            $cache->save($info_dict_cached);
+            $this->logger->debug('write to cache for url: ' . $link);
         }
         // restore playlist options
         $this->options->addOptions($playlist_cmd_save);

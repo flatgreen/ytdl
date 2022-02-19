@@ -9,8 +9,7 @@ PHP wrapper for youtube-dl.
  - minimize requests, while having the maximum amount of information
 
 ## Prerequisites
-- php >= 7.3 | 8.0 (not tested on 8.1)
-- mbstring extension for phpunit
+- php >= 7.3 | 8.0
 - [youtube-dl !](https://github.com/ytdl-org/youtube-dl#installation)
 
 ## Installation
@@ -18,7 +17,7 @@ PHP wrapper for youtube-dl.
 ```bash
 composer require flatgreen/ytdl
 ```
-- Create a 'cache' directory (with read|write permissions), because we want a cache system.
+- Create a 'cache' directory (with read|write permissions), by default a directory is created inside the system temporary directory.
 
 ## Usage
 Load the two classes:
@@ -36,7 +35,7 @@ All the [options for youtube-dl](https://github.com/ytdl-org/youtube-dl#options)
 ytdl_options = new Options();
 // merge with default options
 $ytdl_options->addOptions(['-f' => '18/worst']);
-// or impose (without defaults) options
+// or impose (without default) options
 // $ytdl_options->setOptions(['-f' => '18/worst']);
 ```
 
@@ -44,19 +43,19 @@ Instantiate the class, define a video url;
 ```php
 $ytdl = new Ytdl($ytdl_options);
 
-// optional, change cache options (default 'cache' directory and 86400 sec.):
-$ytdl->setCache(['directory' => 'cache', 'duration' => 3600])
+// optional, change cache options (default 'cache' directory and 3600 sec.):
+$ytdl->setCache(['directory' => 'cache', 'duration' => 7200])
 
 $webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
 ```
 
-Optional: read the video informations
+Read the video informations
 ```php
 $info_dict = $ytdl->extractInfos($webpage_url);
 $errors = $ytdl->getErrors();
 ```
 
-Download the video (if there are some extrated informations, use the cache and limit the number of requests). The download function can be use in another script.
+Download the video (if there is extracted information, use the cache). The download function can be write in another script.
 
 ```php
 $info_dict = $ytdl->download($webpage_url);

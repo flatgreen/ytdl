@@ -5,21 +5,14 @@ require_once '../vendor/autoload.php';
 use Flatgreen\Ytdl\Options;
 use Flatgreen\Ytdl\Ytdl;
 
-// 'cache' directory with write permissions
-
-// Extract some informations about a video
 $webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
 
 $ytdl_options = new Options();
 $ytdl_options->setOptions(['-f' => '18/worst']);
 
 $ytdl = new Ytdl($ytdl_options);
-
-// without cache, request all the time :-(
-// $ytdl->disableCache();
-
-// with cache, be careful, the default directory 'cache' must exist with correct permission
-
+// 'cache' directory with read|write permissions
+$ytdl->setCache(['directory' => 'cache']);
 
 $info_dict = $ytdl->extractInfos($webpage_url);
 $errors = $ytdl->getErrors();

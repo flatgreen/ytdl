@@ -17,6 +17,7 @@ $ytdl_options = new Options();
 $ytdl_options->setOptions(['-f' => '18/worst']);
 
 $ytdl = new Ytdl($ytdl_options);
+$ytdl->setCache(['directory' => 'cache']);
 $info_dict = $ytdl->download($webpage_url, null, $folder_to_download);
 $errors = $ytdl->getErrors();
 
