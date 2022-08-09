@@ -25,7 +25,7 @@ final class YtdlTest extends TestCase
 
    public function testRun(){
        $opt = new Options();
-       $opt->setOptions(['--version']);
+       $opt->addOptions(['--version']);
        $ytdl = new Ytdl($opt, $this->logger);
        $actual = $ytdl->run();
        // it's a date !
@@ -36,26 +36,20 @@ final class YtdlTest extends TestCase
     {
         return [
             ['https://www.youtube.com/watch?v=BaW_jenozKc'],
-            ['https://vimeo.com/293999425'],
-            ['https://www.canal-u.tv/video/cinematheque_francaise/eloge_de_la_maladresse_pratique_obstinee_du_detour_macha_makeieff_et_jerome_deschamps.4741'],
-            ['https://www.franceinter.fr/emissions/lettres-d-interieur/lettres-d-interieur-04-juin-2020']
-            
+            ['https://vimeo.com/293999425']
         ];
     }
     /**
      * @dataProvider extractOKProvider
      */
-   public function testExtractSingleOK($url){
+   public function testExtractSingleOk($url){
         $ytdl = new Ytdl($this->options, $this->logger);
-        $ytdl->setCache(['directory' => 'tests/cache']);
         $actual = $ytdl->extractInfos($url);
-        $this->assertFileExists('tests/cache/' . hash('sha256', $url) . '.json');
         $this->assertEquals($url, $actual['webpage_url']);
-        $this->assertArrayNotHasKey('_type', $actual);
-        $this->assertNull($ytdl->getErrors());
+        $this->assertEmpty($ytdl->getErrors(), 'no error');
    }
 
-   public function extractNoOK(){
+   public function extractNoOk(){
        return [
            ['https://lyl.live/episode/planete-noire-26'],
            ['https://symfony.com/doc/current/components/process.html#finding-the-executable-php-binary'],
@@ -65,66 +59,31 @@ final class YtdlTest extends TestCase
    /**
     * @dataProvider extractNoOK
     */
-   public function testExtractNoOK($url){
+   public function testExtractNoOk($url){
         $ytdl = new Ytdl($this->options, $this->logger);
-        $ytdl->setCache(['directory' => 'tests/cache']);
         $actual = $ytdl->extractInfos($url);
         $this->assertEmpty($actual);
-        $this->assertFileDoesNotExist('tests/cache/' . hash('sha256', $url) . '.json');
-        $this->assertNotNull($ytdl->getErrors());
+        $this->assertNotEmpty($ytdl->getErrors());
    }
 
-   public function extractPlaylistOKProvider(){
+   public function extractPlaylistOkProvider(){
        return [
            ['https://soundcloud.com/lg2-3/sets/amiral-prose-monthly-radio'],
            ['https://www.telerama.fr/radio/2010-2020-une-decennie-de-radio-vue-par-sonia-devillers,n6577631.php'],
-           ['https://www.youtube.com/playlist?list=PLmUCF8zaE6GtED3-SbN31InCGLUw0_9bU'],
-           ['https://www.arte.tv/fr/videos/RC-017841/dopamine/']
-
+           ['https://www.youtube.com/playlist?list=PLm5uVy7nNXqiA3Ykbj9pAouApqBOUCYHd']
        ];
-
    }
    /**
     * @dataProvider extractPlaylistOKProvider
     */
-   public function testExtractPlaylistOK($url){
+   public function testExtractPlaylistOk($url){
        $ytdl = new Ytdl($this->options, $this->logger);
-       $ytdl->setCache(['directory' => 'tests/cache']);
        $actual = $ytdl->extractInfos($url);
-       $this->assertFileExists('tests/cache/' . hash('sha256', $url) . '.json');
        $this->assertArrayHasKey('_type', $actual);
-       $this->assertEquals($url, $actual['webpage_url']);
-       $this->assertNull($ytdl->getErrors());
+       $this->assertArrayHasKey('entries', $actual);
+       $this->assertEquals('playlist', $actual['_type']);
+       $this->assertTrue($ytdl->isPlaylist($actual));
+       $this->assertEmpty($ytdl->getErrors(), 'no error');
    }
-
-   /*
-   public function testDownload(){
-    //    $this->options->addOptions(['-o' => 're1e-%(id)s.%(ext)s']);
-       $ytdl = new Ytdl($this->options, $this->logger);
-       $ytdl->setCache(['directory' => 'tests/cache']);
-
-       $actual = $ytdl->download('https://www.youtube.com/watch?v=BaW_jenozKc');
-    //    $actual = $ytdl->download('https://www.telerama.fr/radio/2010-2020-une-decennie-de-radio-vue-par-sonia-devillers,n6577631.php');
-       file_put_contents('./aa.json', json_encode($actual));
-
-    //    $this->assertEquals();
-
-        //    $this->options->addOptions(['-o' => 're1e-%(id)s.%(ext)s']);
-       $ytdl = new Ytdl($this->options, $this->logger);
-       $ytdl->setCache(['directory' => 'tests/cache']);
-
-    //    $actual = $ytdl->download('https://vimeo.com/293999425');
-    //    $actual = $ytdl->download('https://www.youtube.com/watch?v=BaW_jenozKc');
-       $actual = $ytdl->download('https://www.telerama.fr/radio/2010-2020-une-decennie-de-radio-vue-par-sonia-devillers,n6577631.php');
-       file_put_contents('./aa.json', json_encode($actual));
-
-    //    $this->assertEquals();
-   }
-   */
-
-
-   
-
-
 
 }

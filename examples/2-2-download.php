@@ -7,21 +7,21 @@ require_once '../src/Options.php';
 use Flatgreen\Ytdl\Options;
 use Flatgreen\Ytdl\Ytdl;
 
+// 'cache and 'data' directories must exist and have write permissions
 
-// download a video
 $webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
 
 $ytdl_options = new Options();
-$ytdl_options->setOptions(['-f' => '18/worst']);
+$ytdl_options->addOptions(['-f' => '18']);
 
 $ytdl = new Ytdl($ytdl_options);
 $info_dict = $ytdl->extractInfos($webpage_url);
 
-// we can change the options  and use the cache
-// $ytdl_options->addOptions(['-f' => '22']);
-// $ytdl->setOptions($ytdl_options);
+// Change the options (use the cache)
+$ytdl_options->addOptions(['-f' => '22', '-o' => 'data/%(title)s -- %(format_id)s [%(id)s].%(ext)s']);
+$ytdl->setOptions($ytdl_options);
 
-$info_dict = $ytdl->download($webpage_url, $info_dict);
+$info_dict = $ytdl->download($webpage_url, 'data', $info_dict);
 $errors = $ytdl->getErrors();
 
 if (count($errors) !== 0){

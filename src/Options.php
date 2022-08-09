@@ -7,31 +7,24 @@ use LogicException;
 /**
  * Options
  * 
- * This is a class to help write options for youtube-dl command line.
+ * This is a class to help write options for the command line.
  * 
  * All options are the same as youtube-dl and are passed with an array.
  * @link https://github.com/ytdl-org/youtube-dl#options
+ * @link https://github.com/yt-dlp/yt-dlp#usage-and-options
  * 
  * The class is not for 'URL' argument.
  * 
- * See the 'private $options for default options.
- * 
- * 
  * Basic usage:
- *      $opt = new Options;
- *      $opt->getOptions(); // default options
+ *      $opt = new Options();
+ *      $opt->getDefaultOptions(); // see default options
  * 
  * Usage with more options:
- *      $opt = new Options;
+ *      $opt = new Options();
  *      $opt->addOptions(['-f' => '18']);
- *      $opt->getOptions();
  * 
- *      $opt = new Options;
+ *      $opt = new Options();
  *      $opt->addOptions(['-o' => '%(uploader)s/%(title)s.%(ext)s']);
- *      $opt->getOptions();
- * 
- *      $opt = new Options;
- *      $opt->setOptions(['--version'])->getOptions(); // just one argument
  * 
  */
 class Options{
@@ -39,18 +32,18 @@ class Options{
     /**
      * hold options
      *
-     * @var mixed[]
+     * @var string[]
      */
     private $options;
     
     /**
      * The default options for this class.
      *
-     * @var mixed[]
+     * @var string[]
      */
     private $default_options =
         ['--ignore-errors', '--no-progress',
-        '--no-warnings', '--ignore-config', '--force-ipv4',
+        '--no-warnings', '--ignore-config'
         ];
     
     /**
@@ -68,7 +61,8 @@ class Options{
      *
      * @return mixed[]
      */
-    public function getDefaultOptions(){
+    public function getDefaultOptions(): array
+    {
         return $this->default_options;
     }
 
@@ -80,11 +74,12 @@ class Options{
      * ['-f' => '18'] OK
      * ['-f', '18'] Not OK
      *
-     * @param  mixed[] $options
+     * @param  string[] $options
      * @throws LogicException
      * @return void
      */
-    private function verifOptions(array $options){
+    private function verifOptions(array $options): void
+    {
         foreach($options as $k => $v){
             if (is_int($k) && (substr($v, 0, 1) != '-')){
                 throw new \LogicException("Options must begin with '-' or '--'. 'key' => 'value' for option with value. URL isn't an ytdl option.");
@@ -98,7 +93,7 @@ class Options{
      * 
      * Add or owerwrite some options to ytdl commandline
      *
-     * @param mixed[] $options
+     * @param string[] $options
      * @return $this
      */
     public function addOptions(array $options){
@@ -108,35 +103,15 @@ class Options{
     }
     
     /**
-     * setOptions
-     * 
-     * Reset all default options and set ytdl options
-     *
-     * @param  mixed[] $options
-     * @return $this
-     */
-    public function setOptions(array $options = []){ 
-        $this->verifOptions($options);
-        $this->options = [];
-        if (!empty($options)){
-            $this->addOptions($options);
-        }
-        return $this;
-    }
-
-    
-    /**
      * isOption
      * 
      * True if begin with '-' or '--' else false
      *
-     * TODO delete ?
-     * 
      * @param  string $needle
      * @return bool
      */
-    public function isOption(string $needle){
-        // an option must begin with '-' or '--'
+    public function isOption(string $needle): bool
+    {
         if (substr($needle, 0, 1) != '-'){
             return false;
         }
@@ -144,18 +119,19 @@ class Options{
         return in_array($needle, $arr);
     }
 
-        
     /**
      * linearOptions
      * 
-     * a key must be an int, each argument (simple or with a value) is an array value.
+     * Transform an Option array in simple array,
+     * finally each argument (simple or with a value) is an array value.
      * 
      * From ['-a', '-b' => 'bb'] to ['-a', '-b', 'bb']
      *
-     * @param  mixed[] $arr
-     * @return mixed[]
+     * @param  string[] $arr
+     * @return string[]
      */
-    private function linearOptions(array $arr){
+    protected function linearOptions(array $arr): array
+    {
         $final_options = [];
         foreach($arr as $k => $v){
             if (is_int($k)){
@@ -172,13 +148,14 @@ class Options{
      * getOption
      * 
      * return value from options[$key] or just one option (if alone),
-     * else return default.
+     * else return $default.
      * 
      * @param string $key
      * @param string $default
-     * @return mixed
+     * @return string
      */
-    public function getOption(string $key, string $default = ''){
+    public function getOption(string $key, string $default = ''): string
+    {
         if ($this->isOption($key)){
             return (key_exists($key, $this->options)) ? $this->options[$key] : $key;
         } else {
@@ -191,7 +168,7 @@ class Options{
      * 
      * return all options ready for ytdl process
      * 
-     * @return mixed[]
+     * @return string[]
      */
     public function getOptions(): array
     {
@@ -204,7 +181,8 @@ class Options{
      * @param  string $opt
      * @return void
      */
-    public function removeOption(string $opt){
+    public function removeOption(string $opt): void
+    {
         // $k=>$v
         if (key_exists($opt, $this->options)){
             unset($this->options[$opt]);

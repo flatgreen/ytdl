@@ -9,19 +9,24 @@ use Flatgreen\Ytdl\Ytdl;
 
 
 // download a playlist
-// full 4 videos
-$webpage_url = 'https://www.youtube.com/playlist?list=PLm5uVy7nNXqiA3Ykbj9pAouApqBOUCYHd';
+$webpage_url = 'https://soundcloud.com/lg2-3/sets/amiral-prose-monthly-radio';
 
-
-// TODO - WiP
 $ytdl_options = new Options();
-$ytdl_options->setOptions(['-f' => '18/worst']);
+$ytdl_options->addOptions(['-I' => '1,3']);
 
 $ytdl = new Ytdl($ytdl_options);
-$info_dict = $ytdl->download($webpage_url);
+$ytdl->setCache(['directory' => 'cache']);
 
-echo "<pre>" . implode(' ', $ytdl->getErrors()) . "</pre>";
+// this can not use directly the cache informations :-(
+// see 4-download-plst-with-cache.php
+$info_dict = $ytdl->download($webpage_url, 'data');
+$errors = $ytdl->getErrors();
 
-$json_string = json_encode($info_dict, JSON_PRETTY_PRINT);
-echo "<pre>" . $json_string . "</pre>";
 
+if (count($errors) !== 0){
+    echo "<pre>" . implode(' ', $errors) . "</pre>";
+} else {
+    header('Content-Type: application/json');
+    $json_string = json_encode($info_dict, JSON_PRETTY_PRINT);
+    echo $json_string;
+}

@@ -7,7 +7,7 @@ use Flatgreen\Ytdl\Ytdl;
 
 // options : command line options
 $ytdl_options = new Options();
-$ytdl_options->setOptions(['--version']);
+$ytdl_options->addOptions(['--version']);
 
 $ytdl = new Ytdl($ytdl_options);
 echo($ytdl->run());

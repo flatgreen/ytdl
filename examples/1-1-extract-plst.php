@@ -13,7 +13,7 @@ use Flatgreen\Ytdl\Ytdl;
 $webpage_url = 'https://www.youtube.com/playlist?list=PLm5uVy7nNXqiA3Ykbj9pAouApqBOUCYHd';
 
 $ytdl_options = new Options();
-$ytdl_options->setOptions(['-f' => '18/worst']);
+$ytdl_options->addOptions(['-f' => '18/worst']);
 
 $ytdl = new Ytdl($ytdl_options);
 $info_dict = $ytdl->extractInfos($webpage_url);
