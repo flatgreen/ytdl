@@ -290,7 +290,8 @@ class Ytdl {
         }   
 
         // we will have a nice fresh info_dict
-        // $arguments[] = '--print-json'; // not recommanded by yt-dlp, but work
+        $arguments[] = '--print-json'; // not recommanded by yt-dlp, but work
+        
         // output template: '-o' (or '--output') user has priority over $data_folder
         if (empty(array_intersect(['-o', '--output'], $arguments))){
             $arguments[] = '-o';
