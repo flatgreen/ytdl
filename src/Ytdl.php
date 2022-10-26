@@ -18,17 +18,16 @@ use Flatgreen\Ytdl\Utils;
 
 /**
  * ytdl class, a wrapper for youtube-dl or yt-dlp.
- * 
+ *
  * youtube-dl (python) https://github.com/rg3/youtube-dl
  * yt-dlp (python) https://github.com/yt-dlp/yt-dlp
- * 
+ *
  * All usefull informations is in (array) $info_dict
  * (the same structure than youtube-dl)
- * 
+ *
  */
 class Ytdl
 {
-
     /**
      * ytdl_exec hold the executable path for youtube-dl.
      * @var string|null
@@ -46,12 +45,12 @@ class Ytdl
      * - ext (media extension)
      * - format (require for real download)
      * - _filename is the downloaded media filename (not in info_dict extracted), see '--no-clean-info-json' with yt-dlp
-     * 
+     *
      * - and much more ... (but not require for dl)
-     * 
+     *
      * if info_dict is a playlist:
      * info_dict = ['_type' => 'playlist', 'entries' => []] (perhaps not in yt-dlp...)
-     * 
+     *
      * @var mixed[]
      */
     private $info_dict;
@@ -70,11 +69,11 @@ class Ytdl
 
     /**
      * cache_options.
-     * 
+     *
      * 'directory' cache directory, 'duration' in seconde
-     * 
+     *
      * Default ['directory' => null, 'duration' => 3600]
-     * 
+     *
      * @var mixed[]
      */
     private array $cache_options = ['directory' => null, 'duration' => 3600];
@@ -153,7 +152,7 @@ class Ytdl
      */
     public function getYtdlExecName(): string
     {
-        return (is_null($this->ytdl_exec))? '' : pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
+        return (is_null($this->ytdl_exec)) ? '' : pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
         // return pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
     }
 
@@ -176,7 +175,7 @@ class Ytdl
     /**
      * run.
      * Simple launcher for ytdl exec
-     * 
+     *
      * @throws \Exception if no process success
      * @return string normal output
      */
@@ -196,7 +195,7 @@ class Ytdl
 
     /**
      * isPlaylist
-     * 
+     *
      * Detect 'playlist' in $info_dict
      *
      * @param  mixed[] $info_dict
@@ -223,11 +222,11 @@ class Ytdl
 
     /**
      * extractInfos.
-     * 
+     *
      * Fill info_dict and errors. info_dict is cached (even with playlist).
-     * 
-     * To see ytdl errors: getErrors(), 
-     * 
+     *
+     * To see ytdl errors: getErrors(),
+     *
      * @param string $url like webpage_url in ytdl info_dict
      * @return mixed[] $info_dict or [] if errors
      */
@@ -274,7 +273,7 @@ class Ytdl
 
     /**
      * realDownload.
-     * 
+     *
      * Do the real download, with an $info_dict,
      * function use by 'download'
      *
@@ -351,11 +350,11 @@ class Ytdl
 
     /**
      * download.
-     * 
+     *
      * From an $info_dict download the video, else run ytdl with extractInfos.
-     * 
+     *
      * '-o' or '--output' has priority over $data_folder
-     * 
+     *
      * it's a good idea to read errors (getErrors()).
      *
      * @param  string $link (same as 'webpage_url')
@@ -385,7 +384,7 @@ class Ytdl
 
     /**
      * sanitize
-     * 
+     *
      * Only for playlist.
      * Remove bad/null item in $info_dict.
      * Detect and rename duplicate for 'title'.
