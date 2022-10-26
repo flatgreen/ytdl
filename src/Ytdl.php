@@ -5,6 +5,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Flatgreen\Ytdl;
 
 use Symfony\Component\Process\Process;
@@ -25,7 +26,8 @@ use Flatgreen\Ytdl\Utils;
  * (the same structure than youtube-dl)
  * 
  */
-class Ytdl {
+class Ytdl
+{
 
     /**
      * ytdl_exec hold the executable path for youtube-dl.
@@ -48,7 +50,7 @@ class Ytdl {
      * - and much more ... (but not require for dl)
      * 
      * if info_dict is a playlist:
-     * info_dict = ['_type' => 'playlist', 'entries' => []]
+     * info_dict = ['_type' => 'playlist', 'entries' => []] (perhaps not in yt-dlp...)
      * 
      * @var mixed[]
      */
@@ -76,7 +78,7 @@ class Ytdl {
      * @var mixed[]
      */
     private array $cache_options = ['directory' => null, 'duration' => 3600];
-        
+
     /**
      * @see Options.php
      * @var Options
@@ -84,7 +86,8 @@ class Ytdl {
     private Options $options;
 
 
-    public function __construct(Options $options, LoggerInterface $logger = null){
+    public function __construct(Options $options, LoggerInterface $logger = null)
+    {
         if (null === $logger) {
             $logger = new NullLogger();
         }
@@ -94,10 +97,10 @@ class Ytdl {
         $ytdl_finder = new ExecutableFinder;
         // try first yt-dlp
         $this->ytdl_exec = $ytdl_finder->find('yt-dlp');
-        if (null == $this->ytdl_exec){
+        if (null == $this->ytdl_exec) {
             $this->ytdl_exec = $ytdl_finder->find('youtube-dl');
         }
-        if ($this->ytdl_exec === null){
+        if ($this->ytdl_exec === null) {
             $msg = 'No ytdl executable';
             $this->logger->debug($msg);
             throw new \Exception($msg);
@@ -116,10 +119,9 @@ class Ytdl {
     {
         $this->options = $options;
     }
-    
+
     /**
-     * setCache
-     * 
+     * setCache.
      * Override the default cache setting
      *
      * @param  mixed[] $directory_duration = ['directory' => 'path'|null, 'duration' => int (sec.)]
@@ -127,7 +129,7 @@ class Ytdl {
      */
     public function setCache(array $directory_duration = []): void
     {
-        if (!empty($directory_duration)){
+        if (!empty($directory_duration)) {
             $this->cache_options = array_merge($this->cache_options, $directory_duration);
         }
     }
@@ -146,6 +148,16 @@ class Ytdl {
     }
 
     /**
+     * getYtdlExecName.
+     * @return string
+     */
+    public function getYtdlExecName(): string
+    {
+        return (is_null($this->ytdl_exec))? '' : pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
+        // return pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
+    }
+
+    /**
      * createProcess
      *
      * @param  string[] $arguments for ytdl exec (real) process
@@ -153,6 +165,7 @@ class Ytdl {
      */
     private function createProcess(array $arguments, int $time_out = 0): Process
     {
+        // TODO $time_out is never accessible in public functions
         set_time_limit($time_out);
         $process = new Process(array_merge([$this->ytdl_exec], $arguments));
         $process->setTimeout($time_out);
@@ -189,10 +202,11 @@ class Ytdl {
      * @param  mixed[] $info_dict
      * @return bool
      */
-    public function isPlaylist(array $info_dict = null){
+    public function isPlaylist(array $info_dict = null)
+    {
         return (($info_dict['_type'] ?? null) === 'playlist');
     }
-    
+
     /**
      * outError
      * Collect errors messages for the class
@@ -230,7 +244,7 @@ class Ytdl {
         $this->logger->debug('Cache: directory `' . ($this->cache_options['directory'] ?? 'temporary') . '` duration `' . (string) $this->cache_options['duration'] . '`');
         // with cache
         $info_dict_cached = $cache->getItem(md5($url));
-        if ($info_dict_cached->isHit()){
+        if ($info_dict_cached->isHit()) {
             $this->logger->debug('load from cache: ' . $url);
             return $this->info_dict = $info_dict_cached->get();
         }
@@ -247,14 +261,14 @@ class Ytdl {
         });
 
         $normalOutput = trim($process->getOutput());
-        if (!empty($normalOutput) && ($normalOutput != 'null')){
+        if (!empty($normalOutput) && ($normalOutput != 'null')) {
             $this->info_dict = json_decode($normalOutput, true);
             $this->info_dict = $this->sanitize($this->info_dict);
             $info_dict_cached->set($this->info_dict);
             $cache->save($info_dict_cached);
             $this->logger->debug('write to cache for url: ' . $url);
         }
-        
+
         return $this->info_dict;
     }
 
@@ -274,7 +288,7 @@ class Ytdl {
         $info_dict_return = [];
         $is_playlist = $this->isPlaylist($info_dict);
         // if this is a playlist, no cache system
-        if (!$is_playlist){
+        if (!$is_playlist) {
             // info_dict as file
             $arguments[] = '--load-info-json';
             $tmp = tempnam(sys_get_temp_dir(), 'ytdl');
@@ -282,18 +296,18 @@ class Ytdl {
                 $this->outError(__FUNCTION__, ' No tmp file');
                 return $info_dict;
             }
-            if (false === file_put_contents($tmp, json_encode($info_dict))){
+            if (false === file_put_contents($tmp, json_encode($info_dict))) {
                 $this->outError(__FUNCTION__, 'Write error, no info_dict in tmp file');
                 return $info_dict;
             }
             $arguments[] = $tmp;
-        }   
+        }
 
         // we will have a nice fresh info_dict
         $arguments[] = '--print-json'; // not recommanded by yt-dlp, but work
-        
+
         // output template: '-o' (or '--output') user has priority over $data_folder
-        if (empty(array_intersect(['-o', '--output'], $arguments))){
+        if (empty(array_intersect(['-o', '--output'], $arguments))) {
             $arguments[] = '-o';
             $arguments[] = $data_folder . '%(title)s [%(id)s].%(ext)s';
         }
@@ -304,11 +318,11 @@ class Ytdl {
         $output = trim($process->getOutput());
 
         // ytdl return for each dl each $info_dict in one output
-        if ($is_playlist){
+        if ($is_playlist) {
             $info_dict['entries'] = [];
             $arr_output = preg_split('/\r\n|\r|\n/', $output);
-            if ($arr_output !== false){
-                foreach($arr_output as $a_output){
+            if ($arr_output !== false) {
+                foreach ($arr_output as $a_output) {
                     $info_dict['entries'][] = json_decode($a_output, true);
                 }
                 $info_dict_return = $info_dict;
@@ -323,12 +337,12 @@ class Ytdl {
             if (!empty($errorOutput)) {
                 $this->outError(__FUNCTION__, $errorOutput);
             }
-            if (isset($info_dict_return['_filename'])){
-                unset($info_dict_return['_filename']); 
+            if (isset($info_dict_return['_filename'])) {
+                unset($info_dict_return['_filename']);
             }
         }
 
-        if (isset($tmp)){
+        if (isset($tmp)) {
             unlink($tmp);
         }
         return $info_dict_return;
@@ -353,15 +367,15 @@ class Ytdl {
     {
         $arguments = $this->options->getOptions();
         // if not clear : $data_folder = ./
-        $data_folder = ($data_folder != '')? (($data_folder == '/') ? './' : rtrim($data_folder, '\/') . '/') : $data_folder;
+        $data_folder = ($data_folder != '') ? (($data_folder == '/') ? './' : rtrim($data_folder, '\/') . '/') : $data_folder;
 
         // priority : 1- $info_dict, 2- $this->info_dict, 3- $this->extractInfos();
-        if (!empty($info_dict)){
+        if (!empty($info_dict)) {
             $this->info_dict = $info_dict;
-        } elseif (empty($this->info_dict)){
+        } elseif (empty($this->info_dict)) {
             $this->extractInfos($link);
         } // now we have : $this->info_dict;
-        if (empty($this->info_dict)){
+        if (empty($this->info_dict)) {
             return [];
         }
 
@@ -379,10 +393,11 @@ class Ytdl {
      * @param  mixed[] $info_dict
      * @return mixed[] $info_dict
      */
-    private function sanitize(array $info_dict){
-        if ($this->isPlaylist($info_dict)){
-            foreach($info_dict['entries'] as $k => $entry){
-                if (empty($entry) or empty($entry['title'])){
+    private function sanitize(array $info_dict)
+    {
+        if ($this->isPlaylist($info_dict)) {
+            foreach ($info_dict['entries'] as $k => $entry) {
+                if (empty($entry) or empty($entry['title'])) {
                     unset($info_dict['entries'][$k]);
                     $this->logger->debug('remove null entry: ' . $k);
                 }
@@ -411,5 +426,4 @@ class Ytdl {
     {
         return $this->errors;
     }
-
 }

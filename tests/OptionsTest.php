@@ -34,6 +34,21 @@ final class OptionsTest extends TestCase{
         }
     }
 
+    public function testAddRawOptions(){
+        $opt = new Options;
+        $cmd_line = '--one_alone --with_value value --second_alone -t';
+        $cmd_line_to_linear_options = ['--one_alone', '--with_value', 'value', '--second_alone', '-t'];
+
+        $opt->addRawOptions($cmd_line);
+        $actual = $opt->getOptions();
+        $this->assertIsArray($actual);
+        $expected = array_merge($opt->getDefaultOptions(), $cmd_line_to_linear_options);
+        $this->assertEquals(count($expected), count($actual));
+        foreach($actual as $k => $v){
+            $this->assertEquals($expected[$k], $v);
+        }
+    }
+
     public function testIsOption(){
         $opt = new Options;
         $opt->addOptions($this->options_tests);

@@ -101,6 +101,29 @@ class Options{
         $this->options = array_merge($this->options, $options);
         return $this;
     }
+
+    /**
+     * addRawOptions
+     * 
+     * Add some options in a command line manner
+     *
+     * @param string $options
+     * @phpstan-impure
+     * @return $this
+     */
+    public function addRawOptions(string $options){
+        $arr_opt = explode(' ', trim($options));
+        while (!null == $val = array_shift($arr_opt)){
+            // only '-' or '--' without value
+            if (substr($val, 0, 1) == '-' && isset($arr_opt[0]) && (substr($arr_opt[0], 0, 1) != '-')){
+                $this->addOptions([$val => $arr_opt[0]]);
+                array_shift($arr_opt);
+            } else {
+                $this->addOptions([$val]);
+            }
+        }
+        return $this;
+    }
     
     /**
      * isOption
