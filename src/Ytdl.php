@@ -93,7 +93,7 @@ class Ytdl
         $this->logger = $logger;
         $this->options = $options;
 
-        $ytdl_finder = new ExecutableFinder;
+        $ytdl_finder = new ExecutableFinder();
         // try first yt-dlp
         $this->ytdl_exec = $ytdl_finder->find('yt-dlp');
         if (null == $this->ytdl_exec) {
