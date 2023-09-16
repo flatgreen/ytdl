@@ -99,11 +99,6 @@ class Ytdl
         if (null == $this->ytdl_exec) {
             $this->ytdl_exec = $ytdl_finder->find('youtube-dl');
         }
-        if ($this->ytdl_exec === null) {
-            $msg = 'No ytdl executable';
-            $this->logger->debug($msg);
-            throw new \Exception($msg);
-        }
         $this->logger->debug('ytdl executable: ' . $this->ytdl_exec);
         $this->errors = [];
     }
@@ -164,6 +159,11 @@ class Ytdl
      */
     private function createProcess(array $arguments, int $time_out = 0): Process
     {
+        if ($this->ytdl_exec === null) {
+            $msg = 'No ytdl executable';
+            $this->logger->debug($msg);
+            throw new \Exception($msg);
+        }
         // TODO $time_out is never accessible in public functions
         set_time_limit($time_out);
         $process = new Process(array_merge([$this->ytdl_exec], $arguments));
