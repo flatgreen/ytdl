@@ -156,6 +156,7 @@ class Ytdl
      *
      * @param  string[] $arguments for ytdl exec (real) process
      * @return Process $process
+     * @throws Exception if no executable path
      */
     private function createProcess(array $arguments, int $time_out = 0): Process
     {
