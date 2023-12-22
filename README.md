@@ -66,6 +66,11 @@ $info_dict = $ytdl->download($webpage_url);
 $errors = $ytdl->getErrors();
 ```
 
+If you want to set the ytdl executable path, you need to pass the value like below. This will skip the automatic scan of the executable. It is your responsibility to set this path correctly.
+```php
+$ytdl = new Ytdl($ytdl_options, null, 'usr/share/local/yt-dlp');
+```
+
 ## Examples
 - [example-0](/examples/0-version.php) with just '--version' option
 - [example-1](/examples/1-extract.php) extract example
