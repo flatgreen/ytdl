@@ -85,7 +85,7 @@ class Ytdl
     private Options $options;
 
 
-    public function __construct(Options $options, LoggerInterface $logger = null)
+    public function __construct(Options $options, LoggerInterface $logger = null, string $ytdl_exec = null)
     {
         if (null === $logger) {
             $logger = new NullLogger();
@@ -93,11 +93,17 @@ class Ytdl
         $this->logger = $logger;
         $this->options = $options;
 
-        $ytdl_finder = new ExecutableFinder();
-        // try first yt-dlp
-        $this->ytdl_exec = $ytdl_finder->find('yt-dlp');
-        if (null == $this->ytdl_exec) {
-            $this->ytdl_exec = $ytdl_finder->find('youtube-dl');
+        if($ytdl_exec) {
+            $this->ytdl_exec = $ytdl_exec;
+        }
+
+        if(null === $ytdl_exec) {
+            $ytdl_finder = new ExecutableFinder();
+            // try first yt-dlp
+            $this->ytdl_exec = $ytdl_finder->find('yt-dlp');
+            if (null == $this->ytdl_exec) {
+                $this->ytdl_exec = $ytdl_finder->find('youtube-dl');
+            }
         }
         $this->logger->debug('ytdl executable: ' . $this->ytdl_exec);
         $this->errors = [];
