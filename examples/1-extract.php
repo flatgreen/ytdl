@@ -5,7 +5,9 @@ require_once '../vendor/autoload.php';
 use Flatgreen\Ytdl\Options;
 use Flatgreen\Ytdl\Ytdl;
 
-$webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
+// old yyoutube-dl example, error now
+// $webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
+$webpage_url = 'https://www.youtube.com/watch?v=DTi8wZ1a1TA';
 
 $ytdl_options = new Options();
 $ytdl_options->addOptions(['-f' => '18/worst']);
@@ -16,7 +18,7 @@ $info_dict = $ytdl->extractInfos($webpage_url);
 
 $errors = $ytdl->getErrors();
 
-if (count($errors) !== 0){
+if (count($errors) !== 0) {
     echo "<pre>" . implode(' ', $ytdl->getErrors()) . "</pre>";
 } else {
     header('Content-Type: application/json');

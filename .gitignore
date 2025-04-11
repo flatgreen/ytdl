@@ -7,3 +7,5 @@ vendor/
 "examples/data/"
 .vscode/
 trav/
+VERSIONS
+composer.lock

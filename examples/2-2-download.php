@@ -9,7 +9,7 @@ use Flatgreen\Ytdl\Ytdl;
 
 // 'cache and 'data' directories must exist and have write permissions
 
-$webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
+$webpage_url = 'https://www.youtube.com/watch?v=DTi8wZ1a1TA';
 
 $ytdl_options = new Options();
 $ytdl_options->addOptions(['-f' => '18']);
@@ -24,7 +24,7 @@ $ytdl->setOptions($ytdl_options);
 $info_dict = $ytdl->download($webpage_url, 'data', $info_dict);
 $errors = $ytdl->getErrors();
 
-if (count($errors) !== 0){
+if (count($errors) !== 0) {
     echo "<pre>" . implode(' ', $errors) . "</pre>";
 } else {
     header('Content-Type: application/json');

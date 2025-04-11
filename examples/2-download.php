@@ -10,18 +10,18 @@ use Flatgreen\Ytdl\Ytdl;
 // 'cache and 'data' directories must exist and have write permissions
 
 // download a video
-$webpage_url = 'https://www.youtube.com/watch?v=BaW_jenozKc';
-$folder_to_download = 'data';
+$webpage_url = 'https://www.youtube.com/watch?v=DTi8wZ1a1TA';
+$download_dir = 'data';
 
 $ytdl_options = new Options();
 $ytdl_options->addOptions(['-f' => '18/worst']);
 
 $ytdl = new Ytdl($ytdl_options);
 $ytdl->setCache(['directory' => 'cache']);
-$info_dict = $ytdl->download($webpage_url, $folder_to_download);
+$info_dict = $ytdl->download($webpage_url, $download_dir);
 $errors = $ytdl->getErrors();
 
-if (count($errors) !== 0){
+if (count($errors) !== 0) {
     echo "<pre>" . implode(' ', $errors) . "</pre>";
 } else {
     header('Content-Type: application/json');

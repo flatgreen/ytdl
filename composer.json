@@ -19,9 +19,9 @@
     },
     "require": {
         "php": ">=7.4",
-        "symfony/process": "^5|^6",
+        "symfony/process": "^5|^6|^7",
         "psr/log": "^1|^2|^3",
-        "symfony/cache": "^5|^6"
+        "symfony/cache": "^5|^6|^7"
     },
     "autoload-dev": {
         "psr-4": {
@@ -32,5 +32,9 @@
         "phpunit/phpunit": "^9",
         "brianhenryie/color-logger": "^1",
         "phpstan/phpstan": "^1.8"
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse --level 8 examples/ src/",
+        "tests": "phpunit tests/"
     }
 }

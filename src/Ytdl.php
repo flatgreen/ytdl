@@ -84,7 +84,11 @@ class Ytdl
      */
     private Options $options;
 
-
+    /**
+     * @param Options $options
+     * @param LoggerInterface|null $logger
+     * @param string|null $ytdl_exec absolute path, set this path correctly !
+     */
     public function __construct(Options $options, LoggerInterface $logger = null, string $ytdl_exec = null)
     {
         if (null === $logger) {
@@ -110,7 +114,7 @@ class Ytdl
     }
 
     /**
-     * setOptions, pass new options
+     * setOptions, pass new options (without using the default ones)
      *
      * @param  Options $options
      * @return void
@@ -148,13 +152,22 @@ class Ytdl
     }
 
     /**
+     * Get the absolute executable path
+     *
+     * @return string
+     */
+    public function getYtdlExecPath(): string
+    {
+        return ($this->ytdl_exec) ?? '';
+    }
+
+    /**
      * getYtdlExecName.
      * @return string
      */
     public function getYtdlExecName(): string
     {
         return (is_null($this->ytdl_exec)) ? '' : pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
-        // return pathinfo($this->ytdl_exec, PATHINFO_FILENAME);
     }
 
     /**
@@ -162,7 +175,7 @@ class Ytdl
      *
      * @param  string[] $arguments for ytdl exec (real) process
      * @return Process $process
-     * @throws Exception if no executable path
+     * @throws \Exception if no executable path
      */
     private function createProcess(array $arguments, int $time_out = 0): Process
     {
