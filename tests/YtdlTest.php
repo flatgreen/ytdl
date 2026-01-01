@@ -42,18 +42,18 @@ final class YtdlTest extends TestCase
     public function extractOKProvider()
     {
         return [
-            ['https://www.youtube.com/watch?v=DTi8wZ1a1TA'],
-            ['https://vimeo.com/293999425']
+            ['DTi8wZ1a1TA', 'https://www.youtube.com/watch?v=DTi8wZ1a1TA'],
+            ['24da2291-56fe-42e9-9a87-0f327be87619', 'https://www.france.tv/spectacles-et-culture/theatre-et-danse/les-trois-mousquetaires-la-serie/6807847-episode-12-la-chasse-a-l-equipement-ou-il-s-agit-de-s-equiper.html']
         ];
     }
     /**
     * @dataProvider extractOKProvider
     */
-    public function testExtractSingleOk($url)
+    public function testExtractSingleOk($id, $url)
     {
         $ytdl = new Ytdl($this->options, $this->logger);
         $actual = $ytdl->extractInfos($url);
-        $this->assertEquals($url, $actual['webpage_url']);
+        $this->assertEquals($id, $actual['id']);
         $this->assertEmpty($ytdl->getErrors(), 'no error');
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) flatgreen <flatgreen@gmail.com>
  *
@@ -89,7 +90,7 @@ class Ytdl
      * @param LoggerInterface|null $logger
      * @param string|null $ytdl_exec absolute path, set this path correctly !
      */
-    public function __construct(Options $options, LoggerInterface $logger = null, string $ytdl_exec = null)
+    public function __construct(Options $options, ?LoggerInterface $logger = null, ?string $ytdl_exec = null)
     {
         if (null === $logger) {
             $logger = new NullLogger();
@@ -97,11 +98,11 @@ class Ytdl
         $this->logger = $logger;
         $this->options = $options;
 
-        if($ytdl_exec) {
+        if ($ytdl_exec) {
             $this->ytdl_exec = $ytdl_exec;
         }
 
-        if(null === $ytdl_exec) {
+        if (null === $ytdl_exec) {
             $ytdl_finder = new ExecutableFinder();
             // try first yt-dlp
             $this->ytdl_exec = $ytdl_finder->find('yt-dlp');
@@ -218,10 +219,10 @@ class Ytdl
      *
      * Detect 'playlist' in $info_dict
      *
-     * @param  mixed[] $info_dict
+     * @param  mixed[]|null $info_dict
      * @return bool
      */
-    public function isPlaylist(array $info_dict = null)
+    public function isPlaylist(?array $info_dict = null)
     {
         return (($info_dict['_type'] ?? null) === 'playlist');
     }
@@ -382,7 +383,7 @@ class Ytdl
      * @param  string|'' $data_folder directory path to download (final '/' or not). Not use if '-o' option.
      * @return mixed[] $info_dict fresh one (or empty)
      */
-    public function download(string $link, string $data_folder = '', array $info_dict = null): array
+    public function download(string $link, string $data_folder = '', ?array $info_dict = null): array
     {
         $arguments = $this->options->getOptions();
         // if not clear : $data_folder = ./

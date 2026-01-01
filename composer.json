@@ -31,7 +31,7 @@
     "require-dev": {
         "phpunit/phpunit": "^9",
         "brianhenryie/color-logger": "^1",
-        "phpstan/phpstan": "^1.8"
+        "phpstan/phpstan": "^2"
     },
     "scripts": {
         "phpstan": "phpstan analyse --level 8 examples/ src/",

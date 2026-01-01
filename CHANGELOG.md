@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.6] 2026-01-01
+### Fixed
+- PHP 8.4 deprecation (null type)
+- test ExtractSingleOk
+### Changed
+- phpstan 2
 
 ## [2.5] 2025-04-11
 ### Added
